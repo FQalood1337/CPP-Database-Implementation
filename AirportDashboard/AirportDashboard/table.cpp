@@ -10,6 +10,10 @@ Table::Table() {
 	hashTable = new DataRow[23];
 }
 
+string Table::GetTitle()
+{
+	return this->title;
+}
 
 
 
@@ -175,13 +179,10 @@ void Table::InsertItem(DataRow row) {
 	while (indexesProbed < 23) {
 		if (hashTable[index].id == -1) {
 			hashTable[index] = DataRow(row);
-
 			return;
 		}
 
-
 		index = (index + 1) % 23;
-
 		++indexesProbed;
 	}
 }
@@ -206,4 +207,394 @@ void Table::AddKey(string primary_key)
 vector<string> Table::GetKey()
 {
 	return this->primary_key; 
+}
+
+int Table::KeyExists(vector<string> vals) {
+	int match_count = 0;
+	for (int i = 0;i < rows.size();i++)
+	{
+		DataRow d = rows.at(i);
+
+		for (int j = 0; j < primary_key.size(); j++) {
+			for (int k = 0; k < columns.size(); k++) {
+				DataColumn c = columns.at(k);
+				if (c.GetType().compare("str") == 0) {
+					if (d.strs.at(c.GetIndex()) == vals.at(j))
+					{
+						match_count++;
+					}
+				}
+
+				if (c.GetType().compare("int") == 0) {
+					string num = to_string(d.ints.at(c.GetIndex()));
+					if (num == vals.at(j))
+					{
+						match_count++;
+					}
+				}
+			}
+		}
+		if (match_count < primary_key.size())
+		{
+			match_count = 0;
+		}
+		else
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+void Table::UpdateCsv(string filename, vector<string> colvals, int row_idx)
+{
+	vector<string> records;
+	fstream fin;
+	ofstream fout;
+	//A string representing a line of input, used for parsing over the input file
+	string inputLine;
+
+	//column names stored in file records vector
+	for (int i = 0;i < columns.size();i++)
+	{
+		inputLine += columns.at(i).GetTitle();
+		inputLine += ",";
+	}
+	inputLine = inputLine.substr(0, inputLine.find_last_of(","));
+	records.push_back(inputLine);
+
+	//Attempt tp open the file;
+	fin.open(filename, ios::in);
+
+	//If file fails to load, prompt again until proper file given
+	if (fin.fail())
+	{
+		while (fin.fail())
+		{
+			std::cout << "Error in opening fin while updating record." << std::endl;
+			std::cout << "Try again.\n";
+
+			std::cin >> filename;
+			fin.open(filename);
+		}
+	}
+
+
+	int counter = 0;
+	do {
+		//updated record values stored in file records vector
+		if (counter == row_idx)
+		{
+			inputLine = "";
+			for (int i = 0;i < colvals.size();i++)
+			{
+				inputLine += records.at(i);
+				inputLine += ",";
+			}
+			inputLine = inputLine.substr(0, inputLine.find_last_of(","));
+		}
+		else
+		{
+			//Get the current line
+			getline(fin, inputLine);
+		}
+
+		//If this is the empty space between the first set of lines and the queries, ignore it and break the loop.
+		if (inputLine == "") {
+			break;
+		}
+
+		records.push_back(inputLine);
+
+	} while (inputLine != "");
+
+	for (int k = 0;k < records.size();k++)
+	{
+		fout << records.at(k) << endl;
+	}
+}
+
+void Table::WriteToCsv(string filename, vector<string> colvals)
+{
+	ofstream file;
+	file.open(filename, std::ios_base::app);
+	for (int i = 0;i < colvals.size();i++)
+	{
+		if (i == colvals.size() - 1)
+		{
+			file << colvals.at(i) << endl;
+		}
+		else
+		{
+			file << colvals.at(i) << ",";
+		}
+	}
+	file.close();
+}
+
+void Table::AlertMessage(string table, string key_tuple, string message)
+{
+	cout << message << endl;
+	cout << "Table :"<< table << endl;
+	cout << key_tuple << endl;
+}
+
+void Table::PrintTableRow(int rowid)
+{
+	DataRow d = rows.at(rowid);
+	for (int k = 0; k < columns.size(); k++) {
+		DataColumn c = columns.at(k);
+		if (c.GetType().compare("str") == 0) {
+			cout << "|" << PadString(d.strs.at(c.GetIndex()), 15) << "|";
+		}
+
+		if (c.GetType().compare("int") == 0) {
+			string num = to_string(d.ints.at(c.GetIndex()));
+			cout << "|" << PadString(num, 15) << "|";
+		}
+	}
+	cout << endl;
+}
+
+void Table::INSERT(string inputLine, string table)
+{
+	string values = inputLine.substr(inputLine.find("(") + 2, inputLine.find_last_of(",") - inputLine.find("(") - 3);
+	//cout << "\nInserting data to " << table;
+	values += ",";
+
+	stringstream ss(values);
+
+	string colval;
+
+	vector<string> colvals;
+
+	DataRow row;
+
+	//to keep count of number of col values.
+	int count = 0;
+
+	//A temporary variable for if we can insert or not
+	bool b = false;
+
+	//Delimit the list of commas to get the words and push them to the words vector
+	while (getline(ss, colval, ',')) {
+		if (colval != "") {
+			colvals.push_back(colval);
+		}
+		else {
+			colvals.push_back("-1");
+		}
+	}
+
+	//if colvals more than columns then terminate insert
+	if (colvals.size() > columns.size())
+	{
+		AlertMessage(table, inputLine, "\nprovided # of column values is greater than number of columns of table");
+		return;
+	}
+
+	while (colvals.size() < columns.size())
+	{
+		colvals.push_back("");
+	}
+
+	if (KeyExists(colvals)>-1)
+	{
+		AlertMessage(table, inputLine, "\nEntered key already exists in the table\n");
+		return;
+		/*cout << "\nEntered key already exists in the table\n";
+		cout << "Key: \t";
+		for (int c = 0;c < colvals.size(); c++)
+		{
+			cout << colvals.at(c)<<"\t";
+		}*/
+	}
+
+	for (int i=0; i<columns.size(); i++)
+	{
+		DataColumn d = columns.at(i);
+		//Get that data columns type
+		string type = d.GetType();
+
+		string item;
+		//Get the invidual item in the row
+		if (i < colvals.size())
+		{
+			item = colvals.at(i);
+		}
+		else
+		{
+			item = "-1";
+		}
+
+		//If this columns type is a string, push it to the rows string vector
+		if (type.compare("str") == 0) {
+			row.id = i + 1;
+			row.strs.push_back(item);
+			count++;
+		}
+
+		//Otherwise, if it is an int, push it to the rows integer vector
+		if (type.compare("int") == 0) {
+			int itemInt = stoi(item);
+			row.id = i + 1;
+			row.ints.push_back(itemInt);
+			count++;
+		}
+	}
+
+	if (count == columns.size())
+	{
+		rows.push_back(row);
+		InsertItem(row);
+		string filename = "data\\DATA_" + table + ".CSV";
+		WriteToCsv(filename, colvals);
+		AlertMessage(table, inputLine, "Data Inserted successfully");
+		return;
+	}
+	else
+	{
+		AlertMessage(table, inputLine, "\nColumns mismatched\n");
+	}
+}
+
+void Table::UPDATE(string inputLine, string table)
+{
+	string values = inputLine.substr(inputLine.find("(") + 2, inputLine.find_last_of(",") - inputLine.find("(") - 3);
+
+	cout << "\nupdating data in " << table;
+	values += ",";
+
+	stringstream ss(values);
+
+	string colval;
+
+	vector<string> colvals;
+
+	DataRow row;
+
+	//to keep count of number of col values.
+	int count = 0;
+
+	//A temporary variable for if we can insert or not
+	bool b = false;
+
+	//Delimit the list of commas to get the words and push them to the words vector
+	while (getline(ss, colval, ',')) {
+		if (colval != "") {
+			colvals.push_back(colval);
+		}
+		else {
+			colvals.push_back("-1");
+		}
+	}
+
+	//if colvals more than columns then terminate insert
+	if (colvals.size() > columns.size())
+	{
+		AlertMessage(table, inputLine, "\nprovided # of column values is greater than number of columns of table");
+		return;
+	}
+
+	while (colvals.size() < columns.size())
+	{
+		colvals.push_back("");
+	}
+
+	int row_id = KeyExists(colvals);
+
+	if (row_id > -1)
+	{
+		for (int i = 0; i < columns.size(); i++)
+		{
+			DataColumn d = columns.at(i);
+			//Get that data columns type
+			string type = d.GetType();
+
+			string item;
+			//Get the invidual item in the row
+			if (i < colvals.size())
+			{
+				item = colvals.at(i);
+			}
+			else
+			{
+				item = "-1";
+			}
+
+			//If this columns type is a string, push it to the rows string vector
+			if (type.compare("str") == 0) {
+				row.id = row_id;
+				row.strs.push_back(item);
+				count++;
+			}
+
+			//Otherwise, if it is an int, push it to the rows integer vector
+			if (type.compare("int") == 0) {
+				int itemInt = stoi(item);
+				row.id = row_id;
+				row.ints.push_back(itemInt);
+				count++;
+			}
+		}
+
+		if (count == columns.size())
+		{
+			InsertItem(row);
+			string filename = "data\\DATA_" + table + ".CSV";
+			UpdateCsv(filename, colvals, row_id);
+			AlertMessage(table, inputLine, "\nRow Updated successfully\n");
+			return;
+		}
+		else
+		{
+			AlertMessage(table, inputLine, "\nColumns mismatched\n");
+		}
+	}
+	AlertMessage(table, inputLine, "\nrecord not found\n");
+}
+
+void Table::SELECT(string values, string table)
+{
+	string filtervalue= values.substr(values.find_last_of(",") + 1, values.find_last_of(")") - 1 - values.find_last_of(","));
+
+	vector<int> selectedrows;
+	bool match_found = false;
+	for (int i = 0;i < rows.size();i++)
+	{
+		DataRow d = rows.at(i);
+		for (int k = 0; k < columns.size(); k++) {
+			DataColumn c = columns.at(k);
+			if (c.GetType().compare("str") == 0) {
+				if (d.strs.at(c.GetIndex()) == filtervalue)
+				{
+					selectedrows.push_back(i);
+				}
+			}
+
+			if (c.GetType().compare("int") == 0) {
+				string num = to_string(d.ints.at(c.GetIndex()));
+				if (num == filtervalue)
+				{
+					selectedrows.push_back(i);
+				}
+			}
+		}
+	}
+
+	if (selectedrows.size() > 0)
+	{
+		AlertMessage(table, values, "Following rows matched");
+		while (!selectedrows.empty())
+		{
+			match_found = true;
+			int row_id = selectedrows.back();
+			PrintTableRow(row_id);
+			selectedrows.pop_back();
+		}
+	}
+	if (!match_found)
+	{
+		AlertMessage(table, values, "No match found");
+	}
 }

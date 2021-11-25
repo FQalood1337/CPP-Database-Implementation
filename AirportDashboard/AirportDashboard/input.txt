@@ -3,7 +3,7 @@ DATA_PlaneType.CSV		PlaneType
 DATA_FlightLeg.CSV		FlightLeg
 DATA_PlaneSeats.CSV		PlaneSeats
 DATA_FlightLegInstance.CSV	FlightLegInstance
-DATA_AirPort.CSV		Airport
+DATA_AirPort.CSV		AirPort
 DATA_Pilot.CSV			Pilot
 DATA_FlightInstance.CSV		FlightInstance
 DATA_Reservation.CSV		Reservation
@@ -19,7 +19,7 @@ INSERT((10,Jack,5/2/1990),Pilot)
 INSERT((AIRBUS,A340,F,95),PlaneSeats)
 INSERT((AIRBUS,A340,E,200),PlaneSeats)
 INSERT((10,AIRBUS,A340,09/04/2021,SEA),Plane)
-INSERT((11,1050,10/6/2021,LAX,SEA,E,9/7/2021,)Reservation)
+INSERT((11,1050,10/6/2021,LAX,SEA,E,9/7/2021),Reservation)
 INSERT((12,Jean,(817)222-5555),Passenger)
 INSERT((1050,10/7/2021),FlightInstance)
 INSERT((1050,1,LAX,SEA,1/1/2021,15:30,1/1/2001,21:00,10),FlightLeg)
@@ -50,9 +50,9 @@ DELETE((12,Jean,(817)000-6767),Passenger)
 DELETE((1050,10/8/2021),FlightInstance)
 DELETE((1050,1,LAX,SEA,1/1/2021,15:30,1/1/2021,21:00,10),FlightLeg)
 
-SELECT((*.*),Pilot),Name)
-SELECT((*.*),Reservation),FromA)
-SELECT((*.*),FlightInstance),ActArr)
+SELECT((*.*),Pilot),Jones)
+SELECT((*.*),Reservation),DFW)
+SELECT((*.*),FlightInstance),10:10)
 
 DISPLAY()
 WRITE()

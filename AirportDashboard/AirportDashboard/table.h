@@ -55,7 +55,74 @@ public:
 
 	void InsertItem( DataRow row);
 
+	string GetTitle();
+
+
+	/// <summary>
+	/// This function will check if the given key exists in the table
+	/// </summary>
+	/// <param name="vals"></param>
+	/// <returns>row number of the row containg the key. If key not found it returns -1</returns>
+	int KeyExists(vector<string>);
+
+	/// <summary>
+	/// Update a record in the table's corresponding CSV file and in the table in program's memory
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <param name="colvals"></param>
+	/// <param name="row_idx"></param>
+	/// <returns></returns>
+	void UpdateCsv(string, vector<string>, int);
+
+	/// <summary>
+	/// Write/Append a record in the table's corresponding CSV file and in the table in program's memory
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <param name="colvals"></param>
+	/// <returns></returns>
+	void WriteToCsv(string, vector<string>);
+
+
+	/// <summary>
+	/// Print data corresponding to the table's row for the given row id.
+	/// </summary>
+	/// <param name="rowid"></param>
+	/// <returns></returns>
+	void PrintTableRow(int rowid);
+
+
+	/// <summary>
+	/// Perform SELECT Operation as per the description provided in the documnetation
+	/// </summary>
+	/// <param name="values"></param>
+	/// <param name="table"></param>
+	/// <returns></returns>
+	void SELECT(string, string);
+
+	/// <summary>
+	/// Perform UPDATE Operation as per the description provided in the documnetation
+	/// </summary>
+	/// <param name="inputLine"></param>
+	/// <param name="table"></param>
+	/// <returns></returns>
+	void UPDATE(string, string);
+
+	/// <summary>
+	/// Perform INSERT Operation as per the description provided in the documnetation
+	/// </summary>
+	/// <param name="inputLine"></param>
+	/// <param name="table"></param>
+	/// <returns></returns>
+	void INSERT(string, string);
 	
+	/// <summary>
+	/// Print a message on the CLI
+	/// </summary>
+	/// <param name="table"></param>
+	/// <param name="key_tuple"></param>
+	/// <param name="message"></param>
+	/// <returns></returns>
+	void AlertMessage(string, string, string);
 
 private:
 	/// <summary>

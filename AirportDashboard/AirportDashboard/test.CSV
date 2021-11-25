@@ -10,3 +10,14 @@ FlightInstance,FLNO:k:str,FDate:k:str,,,,,,
 Reservation,PassID:k:str,FLNO:k:str,FDate:k:str,FromA::str,ToA::str,SeatClass::str,DateBooked::str,DateCancelled::str
 Passenger,ID:k:int,Name::str,Phone::str,,,,,
 Flight,FLNO:k:str,Meal::str,Smoking::str,,,,,
+AIRBUS,A340,295,137
+1050,10/5/2021,1/1/2021,19:20,1/1/2002,20:40,8.0
+SEA,Seattle, WA
+10,Jack,5/2/1990
+AIRBUS,A340,F,95
+AIRBUS,A340,E,200
+10,AIRBUS,A340,09/04/2021,SEA
+11,1050,10/6/2021,LAX,SEA,E,9/7/2021
+12,Jean,(817)222-5555
+1050,10/7/2021
+1050,1,LAX,SEA,1/1/2021,15:30,1/1/2001,21:00,10

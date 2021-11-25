@@ -3,6 +3,19 @@
 #include "includes.h"
 #include "TableFactory.h"
 using namespace std;
+
+int find_table(vector<Table> tables, string table)
+{
+    for (int i = 0; i < tables.size(); i++)
+    {
+        if (table == tables.at(i).GetTitle())
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 int main()
 {
     //Initialize the table factory
@@ -69,14 +82,112 @@ int main()
 
     } while (inputLine != "");
 
+    getline(fin, inputLine);
+    cout << inputLine;
+
     for (int i = 0; i < tables.size(); i++)
     {
         tables.at(i).PrintTable();
     }
 
-    fin.close(); 
 
 
+    //Loop over the commands and execute each command using its corresponding function
+    do {
+        getline(fin, inputLine);
+        string tableName;
+        string values;
+        if (inputLine != "")
+        {
+            cout << "\n---------------------------------------------\n";
+            //extracting command from input line read from the input file
+            string command = inputLine.substr(0, inputLine.find("("));
 
+            //extracting table name from input line read from the input file
+            tableName = inputLine.substr(inputLine.find_last_of(",")+1, inputLine.length()- inputLine.find_last_of(",")-2);
+                       
+            if (command == "INSERT")
+            {
+                //check table exists or not
+                int tableidx = find_table(tables, tableName);
+                
+                if (tableidx != -1)
+                {
+                    Table temp = tables.at(tableidx);
+                    DataRow row;
+
+                    //get table title
+                    cout << "\n"<< temp.GetTitle()<<"\n";
+
+                    //execute INSERT command
+                    tables.at(tableidx).INSERT(inputLine, tableName);
+                }
+                else
+                {
+                    cout << "Table: " << tableName << endl;
+                    cout << inputLine;
+                    cout << "\ntable not found in Database!\n";
+                }
+                command = "";
+                cout << "\n---------------------------------------------\n";
+
+            }
+            if (command == "UPDATE")
+            {
+                //check table exists or not
+                int tableidx = find_table(tables, tableName);
+
+                if (tableidx != -1)
+                {
+                    Table temp = tables.at(tableidx);
+                    DataRow row;
+
+                    //get table title
+                    cout << "\n" << temp.GetTitle() << "\n";
+
+                    //execute UPDATE command
+                    tables.at(tableidx).UPDATE(inputLine, tableName);
+                }
+                else
+                {
+                    cout << "Table: " << tableName << endl;
+                    cout << inputLine;
+                    cout << "\ntable not found in Database!\n";
+                }
+                command = "";
+                cout << "\n---------------------------------------------\n";
+
+            }
+            if (command == "SELECT")
+            {
+                //check table exists or not
+                tableName = inputLine.substr(inputLine.find(")") + 2, inputLine.find_last_of(",")-3-inputLine.find(")"));
+                
+                int tableidx = find_table(tables, tableName);
+                if (tableidx != -1)
+                {
+                    Table temp = tables.at(tableidx);
+                    DataRow row;
+
+                    //get table title
+                    cout << "\n" << temp.GetTitle() << "\n";
+                    tables.at(tableidx).SELECT(inputLine, tableName);
+                }
+                else
+                {
+                    cout << "Table: " << tableName << endl;
+                    cout << inputLine;
+                    cout<< "\ntable not found in Database!\n";
+                }
+
+                command = "";
+                cout << "\n---------------------------------------------\n";
+
+            }
+        }
+    } while (inputLine != "WRITE()");//these commands are to be implement in the final submission sprint.
+
+    
+    fin.close();
 }
 
